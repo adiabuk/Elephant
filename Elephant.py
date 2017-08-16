@@ -1,21 +1,30 @@
 #!/usr/bin/python2
 # pylint: disable=no-member
 
+"""
+Elephant - a System Tray Notification system built with Python2 and pyQT4
+Many of the UI components have been taken/adapted from https://github.com/swanson/stacktracker
+which is a notification system for stackoverflow.com
+"""
+
+
 from datetime import timedelta, datetime
 try:
     import json
 except ImportError:
     import simplejson as json
 
-import urllib2
+import calendar
+import inspect
+import logging
 import os
 import re
 import time
-import calendar
-from Queue import Queue
-import logging
-import inspect
+import urllib2
+
 from PyQt4 import QtCore, QtGui
+from Queue import Queue
+
 import oauth as ops
 
 logger = logging.getLogger("Elephant log")
