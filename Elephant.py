@@ -148,7 +148,7 @@ class Events():
     """Application specific representation of an event"""
     def __init__(self, id, name, unixname, email, title, creation_time, url,
                  types, profile):
-
+        self.id = id
         self.unixname = unixname
         self.url = url
         self.title = title
@@ -721,7 +721,7 @@ class Elephant(QtGui.QDialog):
             Pop-up an error box with a message
 
             params:
-            text => msingleton to display
+            text => msg to display
             """
         QtGui.QMessageBox(QtGui.QMessageBox.Critical, "Error!", text).exec_()
 
@@ -905,7 +905,7 @@ class Elephant(QtGui.QDialog):
     def notify(self, notification):
 
         self.my_logging("calling notify.....")
-        self.notifier.showMessage("Elephant", notification.msingleton, 20000)
+        self.notifier.showMessage("Elephant", notification.msg, 20000)
 
     def flash_icon(self):
         self.my_logging("called flashicon")
@@ -1026,14 +1026,13 @@ class WorkerThread(QtCore.QThread):
         self.my_logging("address:%s, auth:%s" %(address, auth))
         event_list = []
 
-        for _, _ in so_data.iteritems():
-            stories_data = so_data["stories"]
-            events_data = so_data["events"]
-
+        stories_data = so_data["stories"]
+        events_data = so_data["events"]
+            
         for story in stories_data:
             for event in story["events"]:
                 event_list.append(event)
-
+        self.my_logging("%d number of items in list" % len(events_data))
         for e in event_list:
             """ Go through events and extract relevent details """
             event = events_data[str(e)]
@@ -1048,8 +1047,10 @@ class WorkerThread(QtCore.QThread):
             try:
                 profile = event['owner']['link']
             except:
+                self.my_logging(event)
                 self.my_logging("Failed to get user details for %s" % name)
                 profile = "www.google.com"
+
             unixname = 'adiab' #unixname=event['owner']['unixname']
             email = 'adiab@hotmail.co.uk' #email=event['owner']['email']
             title = event['title']
@@ -1062,17 +1063,20 @@ class WorkerThread(QtCore.QThread):
                             (event['finish_time'], type(event['finish_time'])))
             current_time = time.time()
             self.my_logging("current_time = " + str(current_time))
-
+            
             if ((event['finish_time'] == 0)
                 or ((event['finish_time'] == event['start_time'])
                  and (current_time - event['start_time'] < 300 ))
                 or ((event['finish_time'] == event['start_time'] + 60)
                     and (current_time - event['start_time'] < 300 ))):
+                self.my_logging("potential item to add")
+             
                 # if finish time doesn't exist, or is the same as start time, 
                 # or event lasted less than 5 minutes (300secs)
-
+                self.my_logging(rebuild_question)
                 if rebuild_question.id not in singleton.remove_list:
                     self.tracker.tracking_list_new.append(rebuild_question)
+                    self.my_logging("adding new item to list")
                 # Finished creating new list
 
         self.my_logging("length of new list: %s" %
@@ -1098,7 +1102,7 @@ class WorkerThread(QtCore.QThread):
 
         if len(self.tracker.tracking_list) == 0:
             """ If no new questions """
-            self.my_logging("no no questions")
+            self.my_logging("no new items")
             self.emit(QtCore.SIGNAL('notify_good'))
             singleton.new_state = 0
             self.my_logging( "this should be 0 %s" % singleton.new_state)
