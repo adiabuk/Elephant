@@ -14,7 +14,9 @@ linux:
 	$(MKDIR) $(LINBIN)
 	$(INSTALL) -m 755 src/Elephant.py $(LINBIN)
 	$(INSTALL) -m 755 src/oauth.py $(LINBIN)
-	$(INSTALL) -m 755 src/img $(LINBIN)
+	$(INSTALL) -m 755 -d src/img $(LINBIN)
+	ln -s /opt/Elephant/Elephant.py /usr/local/bin/Elephant
+
 
 clean:
 	$(RM) $(LINBIN)
